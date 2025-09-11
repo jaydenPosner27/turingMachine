@@ -1,10 +1,10 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 class State{
     String name;
-    boolean start = false;
     boolean accept = false;
     boolean reject = false;
     List<Transition> transList;
@@ -28,10 +28,15 @@ class Transition {
 public class posner_p1{
     public static void main(String [] args) throws FileNotFoundException{
 List<State> stateList = new ArrayList<>();
+boolean validTransition = false;
 String parts[];
 State start = new State("-1");
 String textFile = args[0];
-String [] tape = args[1].split("");
+List<String> tape = new ArrayList<>();
+String [] tape1 = args[1].split("");
+tape.addAll(Arrays.asList(tape1));
+tape.add("_");
+
 Scanner scan = new Scanner(new File(textFile));
 int tot=0;
 
@@ -42,11 +47,11 @@ while(scan.hasNextLine()){
         State newState = new State(parts[1]);
         if(parts.length>2){
             if(parts[2].equals("start")){
-                newState.start = true;
+                start = newState;
             }
             if(parts[2].equals("reject")){
                 newState.reject=true;
-                start = newState;
+                
             }
             if(parts[2].equals("accept")){
                 newState.accept=true;
@@ -67,48 +72,65 @@ int index = 0;
 
 while(true){
     for(Transition tran:start.transList){
-        if(tran.readChar.equals(tape[index])){
+        //System.out.println(index);
+        
+        if(tran.readChar.equals(tape.get(index))){
             tot++;
-            tape[index]=tran.change;
-            index = switch(tran.direction){
-                case "L"->index--;
-                case "R"->index++;
-                default->index;
-            };
+            validTransition=true;
+            if(tape.get(index).equals("_")){tape.add("_");}
+            tape.set(index,tran.change);
+            if(tran.direction.equals("L")){
+                index--;
+                //System.out.println("AAA");
+            }else if(tran.direction.equals("R")){
+                //System.out.println("BBBB");
+                index++;
+            }
             for(State changeState : stateList){
                 if(changeState.name.equals(tran.newState)){
                     start = changeState;
+                    break;
                 }
             }
+            break;
+            
         }     
   }
-   if(start.accept=true){
-            for(String tapeIndex:tape){
-            System.out.print(tapeIndex);
+   if(start.accept==true){
+            while(tape.get(index).equals("_")!=true){
+            System.out.print(tape.get(index));
+            index++;
             }
             System.out.println(" accept");
             break;
         }
-        if(start.reject=true){
-            for(String tapeIndex:tape){
-            System.out.print(tapeIndex);
+        if(start.reject==true || validTransition==false){
+            while(tape.get(index).equals("_")!=true){
+            //System.out.println(tape.get(index).equals("_"));
+            System.out.print(tape.get(index));
+            index++;
             }
             System.out.println(" reject");
             break;
         }
-        if(tot>Integer.parseInt(args[2])){
-            for(String tapeIndex:tape){
-            System.out.print(tapeIndex);
+        if(tot>=Integer.parseInt(args[2])){
+            while(tape.get(index).equals("_")!=true){
+            System.out.print(tape.get(index));
+            index++;
             }
             System.out.println(" quit");
+            break;
         }
         if(index<0){
-            for(String tapeIndex:tape){
-            System.out.print(tapeIndex);
+            index=0;
+            while(tape.get(index).equals("_")!=true){
+            System.out.print(tape.get(index));
+            index++;
             }
             System.out.println(" crash");
+            break;
         } 
-
+        validTransition = false;
 }
 
 
